@@ -33,26 +33,33 @@ export class SceneComponent implements OnInit {
    private cube: Mesh;
    private frameId: number = null
 
+   private container:HTMLDivElement;
+
    @ViewChild('rendererCanvas', { static: true })
   public rendererCanvas: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('sceneContainer', { static: true })
+  public sceneContainer: ElementRef<HTMLDivElement>;
+
 
   constructor(private ngZone: NgZone) { }
 
   async ngOnInit() {
-    await this.createScene(this.rendererCanvas).catch((err) => {
+    await this.createScene(this.sceneContainer).catch((err) => {
       console.error(err);
     });;
-    //this.animate();
+    // this.animate();
   }
 
-  public async createScene(canvas: ElementRef<HTMLCanvasElement>){
+  public async createScene(container: ElementRef<HTMLDivElement>){
     this.scene = new Scene();
     this.scene.background = new Color('skyblue');
 
-    this.canvas = canvas.nativeElement;
+    // this.canvas = canvas.nativeElement;
+    this.container = container.nativeElement;
 
     const fov = 35; // AKA Field of View
-    const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
+    const aspect = this.container.clientWidth / this.container.clientHeight;
     const near = 0.1; // the near clipping plane
     const far = 100; // the far clipping plane
 
@@ -75,13 +82,12 @@ export class SceneComponent implements OnInit {
     this.scene.add(this.cube);
 
     // create the renderer
-    this.renderer = new WebGLRenderer({
-      canvas: this.canvas,
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
-    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+    this.renderer = new WebGLRenderer();
+
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
+
+    this.container.appendChild(this.renderer.domElement);
 
     this.renderer.render(this.scene, this.camera);
 
